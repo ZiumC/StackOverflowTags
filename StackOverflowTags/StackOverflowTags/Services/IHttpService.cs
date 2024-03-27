@@ -2,6 +2,6 @@
 {
     public interface IHttpService
     {
-        public Task<string> DoGet(string url);
+        public Task<string> DoGetAsync(string url);
     }
 }
