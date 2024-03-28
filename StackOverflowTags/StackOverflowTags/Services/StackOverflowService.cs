@@ -15,9 +15,7 @@ namespace StackOverflowTags.Services
 
         public async Task<IEnumerable<TagModel>> GetStackOverflowTagsAsync()
         {
-            var tags = new List<TagModel>();
-
-            return tags;
+            return await _inMemoryContext.Tags.ToListAsync();
         }
     }
 }
