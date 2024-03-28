@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IHttpService, HttpService>();
-builder.Services.AddDbContext<MainDbContext>(opt => opt.UseInMemoryDatabase(databaseName: "InMemDb"));
+builder.Services.AddScoped<IStackOverflowService, StackOverflowService>();
 
 var app = builder.Build();
 
