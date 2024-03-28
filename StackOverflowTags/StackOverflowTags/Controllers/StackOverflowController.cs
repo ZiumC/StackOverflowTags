@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StackOverflowTags.DbContexts;
+using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Services.HttpService;
 using StackOverflowTags.Services.StackOverflowService;
 using System.ComponentModel.DataAnnotations;
@@ -24,9 +25,10 @@ namespace StackOverflowTags.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("tags")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<TagModel>))]
         public async Task<IActionResult> GetTagsAsync()
         {
+
             return Ok(await _stackOverflowService.GetStackOverflowTagsAsync());
         }
     }

@@ -8,5 +8,6 @@
         public bool IsRequired { get; set; }
         public int Count { get; set; }
         public string Name { get; set; }
+        public double Share { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace StackOverflowTags.Services.StackOverflowService
 {
     public class StackOverflowService : IStackOverflowService
     {
-        private readonly InMemoryContext _inMemoryContext;
+        private InMemoryContext _inMemoryContext;
 
         public StackOverflowService(IConfiguration config, IHttpService httpService)
         {

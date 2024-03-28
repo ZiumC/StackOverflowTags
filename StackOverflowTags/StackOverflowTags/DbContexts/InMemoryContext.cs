@@ -52,10 +52,12 @@ namespace StackOverflowTags.DbContexts
             }
 
             int id = 1;
-            for (int i = 1; i <= 11; i++)
+            int times = 11;
+            int pageSize = 100;
+            for (int i = 1; i <= times; i++)
             {
 
-                url = string.Format(url, i, 100);
+                url = string.Format(url, i, pageSize);
                 string stackOverflowTagsString = await httpService.DoGetAsync(url);
 
                 try
@@ -86,6 +88,14 @@ namespace StackOverflowTags.DbContexts
                 }
             }
 
+            await inMemDbContext.SaveChangesAsync();
+
+            var totalShare = inMemDbContext.Tags.Select(t => t.Count).Sum();
+            foreach (var tag in inMemDbContext.Tags)
+            {
+                double share = (double)tag.Count / (double)totalShare;
+                tag.Share = share;
+            }
             await inMemDbContext.SaveChangesAsync();
 
             return inMemDbContext;
