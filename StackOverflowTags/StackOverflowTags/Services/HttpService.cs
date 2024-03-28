@@ -1,27 +1,42 @@
 ﻿
+using StackOverflowTags.Models.DatabaseModels;
 using System;
+using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Xml;
 
 namespace StackOverflowTags.Services
 {
     public class HttpService : IHttpService
     {
-        private readonly HttpClient _client;
+        private readonly HttpClient _httpClient;
         public HttpService()
         {
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.All
-            };
+            var httpClientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+            _httpClient = new HttpClient(httpClientHandler);
 
-            _client = new HttpClient();
         }
 
         public async Task<string> DoGetAsync(string url)
         {
-            using HttpResponseMessage response = await _client.GetAsync(url);
+            using HttpResponseMessage response = await _httpClient.GetAsync(url);
 
-            return await response.Content.ReadAsStringAsync();
+            string message = "";
+            if (response.IsSuccessStatusCode)
+            {
+                message = await response.Content.ReadAsStringAsync();
+            }
+            else 
+            {
+                //NEED TO ADD LOGGING LATER!
+            }
+
+            return message;
         }
     }
 }

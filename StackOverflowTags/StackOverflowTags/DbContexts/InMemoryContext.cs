@@ -24,7 +24,7 @@ namespace StackOverflowTags.DbContexts
             var prodDbContext = new InMemoryContext(options);
             prodDbContext.Database.EnsureDeleted();
 
-            Console.WriteLine(await httpService.DoGetAsync("https://api.stackexchange.com/2.3/tags?page=1&pagesize=1&order=desc&sort=popular&site=stackoverflow"));
+            Console.WriteLine(await httpService.DoGetAsync("https://api.stackexchange.com/2.3/tags?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&page=1&pagesize=1&order=desc&sort=popular&filter=default"));
 
             return prodDbContext;
         }
