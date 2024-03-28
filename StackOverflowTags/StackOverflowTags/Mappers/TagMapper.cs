@@ -6,7 +6,7 @@ namespace StackOverflowTags.Mappers
 {
     public class TagMapper
     {
-        public T? DeserializeResponse<T>(string httpMessage, string key)
+        public T? DeserializeResponse<T>(string httpMessage, string? key)
         {
             if (string.IsNullOrEmpty(key))
             {

@@ -11,7 +11,6 @@ namespace StackOverflowTags.DbContexts
 {
     public class InMemoryContext : DbContext
     {
-
         public InMemoryContext(DbContextOptions opt) : base(opt)
         {
         }
@@ -46,34 +45,47 @@ namespace StackOverflowTags.DbContexts
             inMemDbContext.Database.EnsureDeleted();
 
             string? url = config["EndpointHosts:StackOverflow:Tags"];
+            string? keyNameTagsJson = config["Application:TagsKeyJsonName"];
             if (string.IsNullOrEmpty(url))
             {
                 throw new Exception("Unable to create in memory data due to url string is empty");
             }
 
-            url = string.Format(url, 1, 1);
-            string stackOverflowTagsString = await httpService.DoGetAsync(url);
-
-            var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, "items");
-            if (tagData == null)
-            {
-                throw new Exception("Unavle to receive C# objest from string");
-            }
-
             int id = 1;
-            foreach (var tag in tagData)
+            for (int i = 1; i <= 11; i++)
             {
-                inMemDbContext.Add(new TagModel
+
+                url = string.Format(url, i, 100);
+                string stackOverflowTagsString = await httpService.DoGetAsync(url);
+
+                try
                 {
-                    Id = id,
-                    Name = tag.Name,
-                    Count = tag.Count,
-                    HasSynonyms = tag.Has_synonyms,
-                    IsModeratorOnly = tag.Is_moderator_only,
-                    IsRequired = tag.Is_required
-                });
-                id++;
+                    var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, keyNameTagsJson);
+                    if (tagData == null)
+                    {
+                        throw new Exception("Unavle to receive C# objest from string");
+                    }
+
+                    foreach (var tag in tagData)
+                    {
+                        inMemDbContext.Add(new TagModel
+                        {
+                            Id = id,
+                            Name = tag.Name,
+                            Count = tag.Count,
+                            HasSynonyms = tag.Has_synonyms,
+                            IsModeratorOnly = tag.Is_moderator_only,
+                            IsRequired = tag.Is_required
+                        });
+                        id++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
+
             await inMemDbContext.SaveChangesAsync();
 
             return inMemDbContext;
