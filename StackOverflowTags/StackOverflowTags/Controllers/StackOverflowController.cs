@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Services.HttpService;
@@ -21,15 +22,33 @@ namespace StackOverflowTags.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Get StackOverflow tags
         /// </summary>
-        /// <returns></returns>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns>SO tags</returns>
         [HttpGet("tags")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<TagModel>))]
-        public async Task<IActionResult> GetTagsAsync()
+        public async Task<IActionResult> GetTagsAsync(int page = 1, int pageSize = 20)
         {
+            if (page <= 0)
+            {
+                page = 1;
+            }
 
-            return Ok(await _stackOverflowService.GetStackOverflowTagsAsync());
+            if (pageSize <= 0)
+            {
+                pageSize = 20;
+            }
+
+            var tags = await _stackOverflowService.GetStackOverflowTagsAsync();
+
+            var tagsPerPage = tags
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Ok(tagsPerPage);
         }
     }
 }
