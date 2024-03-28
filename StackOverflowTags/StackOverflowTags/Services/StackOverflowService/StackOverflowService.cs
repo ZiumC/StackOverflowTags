@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Models.DatabaseModels;
+using StackOverflowTags.Services.HttpService;
 
-namespace StackOverflowTags.Services
+namespace StackOverflowTags.Services.StackOverflowService
 {
     public class StackOverflowService : IStackOverflowService
     {

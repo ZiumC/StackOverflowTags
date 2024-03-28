@@ -11,7 +11,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
 
-namespace StackOverflowTags.Services
+namespace StackOverflowTags.Services.HttpService
 {
     public class HttpService : IHttpService
     {

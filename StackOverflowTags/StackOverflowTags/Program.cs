@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StackOverflowTags.DbContexts;
-using StackOverflowTags.Services;
+using StackOverflowTags.Services.HttpService;
+using StackOverflowTags.Services.StackOverflowService;
 
 var builder = WebApplication.CreateBuilder(args);
 

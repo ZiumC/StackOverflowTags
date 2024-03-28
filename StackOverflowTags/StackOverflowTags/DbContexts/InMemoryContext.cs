@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using StackOverflowTags.Models.DatabaseModels;
-using StackOverflowTags.Services;
 using StackOverflowTags.Mappers;
 using StackOverflowTags.Models.JsonModels;
+using StackOverflowTags.Services.HttpService;
 
 namespace StackOverflowTags.DbContexts
 {

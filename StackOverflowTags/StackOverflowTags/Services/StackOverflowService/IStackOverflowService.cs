@@ -1,6 +1,6 @@
 ﻿using StackOverflowTags.Models.DatabaseModels;
 
-namespace StackOverflowTags.Services
+namespace StackOverflowTags.Services.StackOverflowService
 {
     public interface IStackOverflowService
     {
