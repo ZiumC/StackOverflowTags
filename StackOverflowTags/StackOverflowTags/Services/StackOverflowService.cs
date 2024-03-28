@@ -8,9 +8,9 @@ namespace StackOverflowTags.Services
     {
         private readonly InMemoryContext _inMemoryContext;
 
-        public StackOverflowService(IHttpService httpService)
+        public StackOverflowService(IConfiguration config, IHttpService httpService)
         {
-            _inMemoryContext = new InMemoryContext().GetDatabaseContextAsync(httpService).Result;
+            _inMemoryContext = new InMemoryContext().GetDatabaseContextAsync(config, httpService).Result;
         }
 
         public async Task<IEnumerable<TagModel>> GetStackOverflowTagsAsync()

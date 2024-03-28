@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json.Linq;
 using StackOverflowTags.Models.DatabaseModels;
 using System;
 using System.IO.Compression;
@@ -31,7 +32,7 @@ namespace StackOverflowTags.Services
             {
                 message = await response.Content.ReadAsStringAsync();
             }
-            else 
+            else
             {
                 //NEED TO ADD LOGGING LATER!
             }

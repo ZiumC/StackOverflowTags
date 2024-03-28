@@ -1,5 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Services;
+using StackOverflowTags.Mappers;
+using StackOverflowTags.Models.JsonModels;
 
 namespace StackOverflowTags.DbContexts
 {
@@ -15,7 +21,7 @@ namespace StackOverflowTags.DbContexts
 
         }
 
-        public async Task<InMemoryContext> GetDatabaseContextAsync(IHttpService httpService)
+        public async Task<InMemoryContext> GetDatabaseContextAsync(IConfiguration config, IHttpService httpService)
         {
             var options = new DbContextOptionsBuilder<InMemoryContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -24,9 +30,25 @@ namespace StackOverflowTags.DbContexts
             var prodDbContext = new InMemoryContext(options);
             prodDbContext.Database.EnsureDeleted();
 
-            Console.WriteLine(await httpService.DoGetAsync("https://api.stackexchange.com/2.3/tags?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&page=1&pagesize=1&order=desc&sort=popular&filter=default"));
+            string? url = config["EndpointHosts:StackOverflow:Tags"];
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new Exception("Unable to create in memory data due to url string is empty");
+            }
+
+            url = string.Format(url, 1, 1);
+            string stackOverflowTagsString = await httpService.DoGetAsync(url);
+
+            var jsonData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, "items");
+            if (jsonData == null)
+            {
+                throw new Exception("Unavle to receive C# objest from string");
+            }
+
+            
 
             return prodDbContext;
         }
+
     }
 }
