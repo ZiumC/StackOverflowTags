@@ -20,8 +20,9 @@ namespace StackOverflowTags.Controllers
         }
 
         /// <summary>
-        /// Get any tags
+        /// 
         /// </summary>
+        /// <returns></returns>
         [HttpGet("tags")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> GetTagsAsync()
