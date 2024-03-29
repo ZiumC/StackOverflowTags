@@ -35,6 +35,7 @@ namespace StackOverflowTags.Services.HttpService
             else
             {
                 //NEED TO ADD LOGGING LATER!
+                throw new Exception("Response message is wrong");
             }
 
             return message;

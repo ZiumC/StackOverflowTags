@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Services.HttpService;
 using StackOverflowTags.Services.StackOverflowService;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +12,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IHttpService, HttpService>();
 builder.Services.AddScoped<IStackOverflowService, StackOverflowService>();
+builder.Services.AddDbContext<InMemoryContext>(opt => opt.UseInMemoryDatabase("InMemoryDb"));
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Pinionszek API",
+        Version = "v1",
+        Description = "GET endpoints"
+    });
+
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+    // Set the comments path for the Swagger JSON and UI.
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
 
 var app = builder.Build();
 
@@ -20,7 +40,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint($"/swagger/v1/swagger.json", "StackOverflow Api v1");
+    });
 }
 
 app.UseHttpsRedirection();
