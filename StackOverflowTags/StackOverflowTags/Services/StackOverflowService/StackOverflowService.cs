@@ -49,13 +49,15 @@ namespace StackOverflowTags.Services.StackOverflowService
 
         public async Task<bool> RefillDatabase()
         {
+            //this wokraround is needed due to transactions aren't supported using DatabaseInMemory
+            var dataCopy = _inMemoryContext.Tags.ToList();
+
             foreach (var tag in _inMemoryContext.Tags)
             {
                 _inMemoryContext.Tags.Remove(tag);
             }
             await _inMemoryContext.SaveChangesAsync();
 
-            int id = 1;
             for (int i = 1; i <= _times; i++)
             {
                 string url = string.Format(_url, i, _size);
@@ -63,7 +65,13 @@ namespace StackOverflowTags.Services.StackOverflowService
                 var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _keyNameTagsJson);
                 if (tagData == null)
                 {
-                    continue;
+                    await _inMemoryContext.Database.EnsureDeletedAsync();
+                    foreach (var tag in dataCopy)
+                    {
+                        _inMemoryContext.Tags.Add(tag);
+                    }
+                    await _inMemoryContext.SaveChangesAsync();
+                    return false;
                 }
 
                 var totalShare = tagData.Select(td => td.Count).Sum();
@@ -72,7 +80,6 @@ namespace StackOverflowTags.Services.StackOverflowService
                 {
                     _inMemoryContext.Tags.Add(new TagModel
                     {
-                        Id = id,
                         Name = tag.Name,
                         Count = tag.Count,
                         HasSynonyms = tag.Has_synonyms,
@@ -80,7 +87,6 @@ namespace StackOverflowTags.Services.StackOverflowService
                         IsRequired = tag.Is_required,
                         Share = (double)tag.Count / (double)totalShare
                     });
-                    id++;
                 }
 
                 await _inMemoryContext.SaveChangesAsync();
