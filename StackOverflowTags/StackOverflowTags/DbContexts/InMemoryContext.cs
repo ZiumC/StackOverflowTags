@@ -14,7 +14,7 @@ namespace StackOverflowTags.DbContexts
     public class InMemoryContext : DbContext
     {
 
-        private readonly int _times = 11;
+        private readonly int _times = 1;
         private readonly int _size = 100;
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
@@ -32,7 +32,6 @@ namespace StackOverflowTags.DbContexts
             string? url = _config["EndpointHosts:StackOverflow:Tags"];
             string? keyNameTagsJson = _config["Application:TagsKeyJsonName"];
             int id = 1;
-            long totalShare = 0;
 
             if (string.IsNullOrEmpty(url))
             {
@@ -48,7 +47,7 @@ namespace StackOverflowTags.DbContexts
             {
                 url = string.Format(url, i, _size);
                 //string stackOverflowTagsString = await _httpService.DoGetAsync(url);
-                string stackOverflowTagsString = "{\"items\": [{\"has_synonyms\": true,\"is_moderator_only\": false,\"is_required\": false,\"count\": 2528942,\"name\": \"javascript\"}],\"has_more\": true,\"quota_max\": 10000,\"quota_remaining\": 9693}";
+                string stackOverflowTagsString = "{\"items\":[{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":2528949,\"name\":\"javascript\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":2192345,\"name\":\"python\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1917388,\"name\":\"java\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1615031,\"name\":\"c#\"},{\"collectives\":[{\"tags\":[\"php\"],\"external_links\":[{\"type\":\"support\",\"link\":\"https://stackoverflow.com/contact?topic=15\"}],\"description\":\"A collective where developers working with PHP can learn and connect about the open source scripting language.\",\"link\":\"/collectives/php\",\"name\":\"PHP\",\"slug\":\"php\"}],\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1464485,\"name\":\"php\"},{\"collectives\":[{\"tags\":[\"android\",\"ios\"],\"external_links\":[{\"type\":\"support\",\"link\":\"https://stackoverflow.com/contact?topic=15\"}],\"description\":\"A collective for developers who want to share their knowledge and learn more about mobile development practices and platforms\",\"link\":\"/collectives/mobile-dev\",\"name\":\"Mobile Development\",\"slug\":\"mobile-dev\"}],\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1417280,\"name\":\"android\"}],\"has_more\":true,\"quota_max\":10000,\"quota_remaining\":9692}";
                 try
                 {
                     var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, keyNameTagsJson);
@@ -56,6 +55,8 @@ namespace StackOverflowTags.DbContexts
                     {
                         throw new Exception("Unavle to receive C# objest from string");
                     }
+
+                    var totalShare = tagData.Select(td => td.Count).Sum();
 
                     foreach (var tag in tagData)
                     {
@@ -68,11 +69,11 @@ namespace StackOverflowTags.DbContexts
                                 Count = tag.Count,
                                 HasSynonyms = tag.Has_synonyms,
                                 IsModeratorOnly = tag.Is_moderator_only,
-                                IsRequired = tag.Is_required
+                                IsRequired = tag.Is_required,
+                                Share = (double)tag.Count / (double)totalShare
                             });
                         });
                         id++;
-                        totalShare = totalShare + tag.Count;
                     }
                 }
                 catch (Exception ex)
