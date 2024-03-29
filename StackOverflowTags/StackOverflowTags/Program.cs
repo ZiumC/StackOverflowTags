@@ -15,6 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IHttpService, HttpService>();
 builder.Services.AddScoped<IStackOverflowService, StackOverflowService>();
+builder.Services.AddDbContext<InMemoryContext>(opt => opt.UseInMemoryDatabase("InMemoryDb"));
 
 builder.Services.AddSwaggerGen(c =>
 {

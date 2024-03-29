@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json.Linq;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Models.DatabaseModels;
@@ -15,6 +16,7 @@ namespace StackOverflowTags.Controllers
     {
         private readonly IStackOverflowService _stackOverflowService;
         private readonly IHttpService _httpService;
+
         public StackOverflowController(IStackOverflowService stackOverflowService, IHttpService httpService)
         {
             _stackOverflowService = stackOverflowService;
@@ -33,22 +35,19 @@ namespace StackOverflowTags.Controllers
         {
             if (page <= 0)
             {
-                page = 1;
+                ModelState.AddModelError("error", "Page number is invalid");
+                return BadRequest(ModelState);
             }
 
             if (pageSize <= 0)
             {
-                pageSize = 20;
+                ModelState.AddModelError("error", "Page size is invalid");
+                return BadRequest(ModelState);
             }
 
             var tags = await _stackOverflowService.GetStackOverflowTagsAsync();
 
-            var tagsPerPage = tags
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            return Ok(tagsPerPage);
+            return Ok(tags);
         }
     }
 }

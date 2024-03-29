@@ -6,60 +6,49 @@ using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Mappers;
 using StackOverflowTags.Models.JsonModels;
 using StackOverflowTags.Services.HttpService;
+using System;
+using Microsoft.Extensions.Configuration;
 
 namespace StackOverflowTags.DbContexts
 {
     public class InMemoryContext : DbContext
     {
-        public InMemoryContext(DbContextOptions opt) : base(opt)
-        {
-        }
 
-        public InMemoryContext()
-        {
+        private readonly int _times = 11;
+        private readonly int _size = 100;
+        private readonly IConfiguration _config;
+        private readonly IHttpService _httpService;
 
+        public InMemoryContext(DbContextOptions<InMemoryContext> options, IConfiguration config, IHttpService httpService) : base(options)
+        {
+            _config = config;
+            _httpService = httpService;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<TagModel>(tm =>
-            {
-                tm.HasKey(tm => tm.Id);
-                tm.Property(tm => tm.HasSynonyms).IsRequired();
-                tm.Property(tm => tm.IsModeratorOnly).IsRequired();
-                tm.Property(tm => tm.IsRequired).IsRequired();
-                tm.Property(tm => tm.Count).IsRequired();
-                tm.Property(tm => tm.Name).IsRequired().HasMaxLength(512);
-            });
-        }
+            string? url = _config["EndpointHosts:StackOverflow:Tags"];
+            string? keyNameTagsJson = _config["Application:TagsKeyJsonName"];
+            int id = 1;
+            long totalShare = 0;
 
-        public async Task<InMemoryContext> GetDatabaseContextAsync(IConfiguration config, IHttpService httpService)
-        {
-            var options = new DbContextOptionsBuilder<InMemoryContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            var inMemDbContext = new InMemoryContext(options);
-            inMemDbContext.Database.EnsureDeleted();
-
-            string? url = config["EndpointHosts:StackOverflow:Tags"];
-            string? keyNameTagsJson = config["Application:TagsKeyJsonName"];
             if (string.IsNullOrEmpty(url))
             {
                 throw new Exception("Unable to create in memory data due to url string is empty");
             }
 
-            int id = 1;
-            int times = 11;
-            int pageSize = 100;
-            for (int i = 1; i <= times; i++)
+            if (string.IsNullOrEmpty(keyNameTagsJson))
             {
+                throw new Exception("Unable to create in memory data due to url string is empty");
+            }
 
-                url = string.Format(url, i, pageSize);
-                string stackOverflowTagsString = await httpService.DoGetAsync(url);
-
+            for (int i = 1; i <= _times; i++)
+            {
+                url = string.Format(url, i, _size);
+                //string stackOverflowTagsString = await _httpService.DoGetAsync(url);
+                string stackOverflowTagsString = "{\"items\": [{\"has_synonyms\": true,\"is_moderator_only\": false,\"is_required\": false,\"count\": 2528942,\"name\": \"javascript\"}],\"has_more\": true,\"quota_max\": 10000,\"quota_remaining\": 9693}";
                 try
                 {
                     var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, keyNameTagsJson);
@@ -70,16 +59,20 @@ namespace StackOverflowTags.DbContexts
 
                     foreach (var tag in tagData)
                     {
-                        inMemDbContext.Add(new TagModel
+                        modelBuilder.Entity<TagModel>(tm =>
                         {
-                            Id = id,
-                            Name = tag.Name,
-                            Count = tag.Count,
-                            HasSynonyms = tag.Has_synonyms,
-                            IsModeratorOnly = tag.Is_moderator_only,
-                            IsRequired = tag.Is_required
+                            tm.HasData(new TagModel
+                            {
+                                Id = id,
+                                Name = tag.Name,
+                                Count = tag.Count,
+                                HasSynonyms = tag.Has_synonyms,
+                                IsModeratorOnly = tag.Is_moderator_only,
+                                IsRequired = tag.Is_required
+                            });
                         });
                         id++;
+                        totalShare = totalShare + tag.Count;
                     }
                 }
                 catch (Exception ex)
@@ -87,18 +80,6 @@ namespace StackOverflowTags.DbContexts
                     Console.WriteLine(ex);
                 }
             }
-
-            await inMemDbContext.SaveChangesAsync();
-
-            var totalShare = inMemDbContext.Tags.Select(t => t.Count).Sum();
-            foreach (var tag in inMemDbContext.Tags)
-            {
-                double share = (double)tag.Count / (double)totalShare;
-                tag.Share = share;
-            }
-            await inMemDbContext.SaveChangesAsync();
-
-            return inMemDbContext;
         }
 
         public DbSet<TagModel> Tags { get; set; }
