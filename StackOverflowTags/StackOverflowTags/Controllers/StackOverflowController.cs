@@ -79,5 +79,17 @@ namespace StackOverflowTags.Controllers
 
             return Ok(tagsPerPage);
         }
+
+        /// <summary>
+        /// Refills database
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("refill")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> RefillDatabaseAsync()
+        {
+            bool hasDbRefilled = await _stackOverflowService.RefillDatabase();
+            return Ok(new { HasDbRefilled = hasDbRefilled });
+        }
     }
 }
