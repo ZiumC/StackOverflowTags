@@ -28,12 +28,11 @@ namespace StackOverflowTags.Controllers
         /// </summary>
         /// <param name="page">Page number</param>
         /// <param name="pageSize">Page size</param>
-        /// <param name="nameOrder">Order by tag name</param>
-        /// <param name="shareOrder">Order by share</param>
+        /// <param name="order">Order by</param>
         /// <returns>SO tags</returns>
         [HttpGet("tags")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<TagModel>))]
-        public async Task<IActionResult> GetTagsAsync(int page = 1, int pageSize = 20, string nameOrder = "asc", string shareOrder = "asc")
+        public async Task<IActionResult> GetTagsAsync(int page = 1, int pageSize = 20, string order = "asc")
         {
             if (page <= 0)
             {
@@ -59,16 +58,22 @@ namespace StackOverflowTags.Controllers
                 .Take(pageSize)
                 .ToList();
 
-            switch (nameOrder.ToLower())
+            switch (order.ToLower())
             {
                 case "asc":
-                    tagsPerPage = tagsPerPage.OrderBy(tpp => tpp.Name).ToList();
+                    tagsPerPage = tagsPerPage
+                        .OrderBy(tpp => tpp.Name)
+                        .ThenBy(tpp => tpp.Share)
+                        .ToList();
                     break;
                 case "desc":
-                    tagsPerPage = tagsPerPage.OrderByDescending(tpp => tpp.Name).ToList();
+                    tagsPerPage = tagsPerPage
+                        .OrderByDescending(tpp => tpp.Name)
+                        .ThenByDescending(tpp => tpp.Share)
+                        .ToList();
                     break;
                 default:
-                    ModelState.AddModelError("error", "Page size is invalid");
+                    ModelState.AddModelError("error", "Order type is unknown");
                     return BadRequest(ModelState);
             }
 
