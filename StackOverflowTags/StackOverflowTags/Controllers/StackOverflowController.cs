@@ -46,8 +46,17 @@ namespace StackOverflowTags.Controllers
             }
 
             var tags = await _stackOverflowService.GetStackOverflowTagsAsync();
+            if (tags == null || tags.Count() == 0)
+            {
+                return NotFound();
+            }
 
-            return Ok(tags);
+            var tagsPerPage = tags
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Ok(tagsPerPage);
         }
     }
 }
