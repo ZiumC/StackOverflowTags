@@ -16,7 +16,7 @@ namespace StackOverflowTags.Tests.DbContexts
         public async Task<InMemoryContext> GetDatabaseContext()
         {
             var options = new DbContextOptionsBuilder<InMemoryContext>()
-                .UseInMemoryDatabase(databaseName: "TEST_DB")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             var inMemContext = new InMemoryContext(options);
