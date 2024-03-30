@@ -28,7 +28,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
         }
 
         [Fact]
-        public void TagUtils_DeserializeResponse_DeserializedTags()
+        public void TagUtils_DeserializeResponse_ReturnsDeserializedTags()
         {
             //Arrange
             var tagUtils = new TagUtils(new HttpService());
@@ -36,7 +36,8 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
             var tagsJsonField = _config["Application:TagsJsonField"];
 
             //Act
-            var desarielizedObjects = tagUtils.DeserializeResponse<IEnumerable<JsonTagModel>>(hardcodedTagsStrings, tagsJsonField);
+            var desarielizedObjects = tagUtils
+                .DeserializeResponse<IEnumerable<JsonTagModel>>(hardcodedTagsStrings, tagsJsonField);
 
             //Assert
             desarielizedObjects.Should().NotBeNullOrEmpty();
@@ -44,6 +45,27 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
             desarielizedObjects?.Count().Should().Be(6);
             desarielizedObjects?.Select(x => x.Count).Sum().Should().Be(11135478);
             desarielizedObjects?
+                .Where(x => string.IsNullOrEmpty(x.Name))
+                .Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void TagUtils_DoTagRequestAsync_ReturnsDeserializedTags()
+        {
+            //Arrange
+            var tagUtils = new TagUtils(new HttpService());
+            var tagsJsonField = _config["Application:TagsJsonField"];
+            var url = _config["EndpointHosts:StackOverflow:Tags"];
+
+            //Act
+            var desarielizedObjects = tagUtils
+                .DoTagRequest(url, tagsJsonField, 1, 100);
+
+            //Assert
+            desarielizedObjects.Should().NotBeNullOrEmpty();
+            desarielizedObjects.Should().BeOfType<List<JsonTagModel>>();
+            desarielizedObjects.Count().Should().Be(100);
+            desarielizedObjects
                 .Where(x => string.IsNullOrEmpty(x.Name))
                 .Should().BeNullOrEmpty();
         }

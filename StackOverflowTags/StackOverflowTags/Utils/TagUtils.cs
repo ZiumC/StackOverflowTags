@@ -32,7 +32,7 @@ namespace StackOverflowTags.Mappers
             return JsonConvert.DeserializeObject<T>(jsonData[key].ToString());
         }
 
-        public List<JsonTagModel> DoTagRequestAsync(string url, string? jsonTagField, int times = 11, int maxPageSize = 100)
+        public List<JsonTagModel> DoTagRequest(string url, string? jsonTagField, int times = 11, int maxPageSize = 100)
         {
             if (string.IsNullOrEmpty(jsonTagField))
             {

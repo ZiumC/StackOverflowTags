@@ -47,7 +47,7 @@ namespace StackOverflowTags.DbContexts
                 throw new Exception("Unable to create in memory data due to url string is empty");
             }
 
-            var newTags = _tagUtils.DoTagRequestAsync(_url, _tagsJsonField);
+            var newTags = _tagUtils.DoTagRequest(_url, _tagsJsonField);
             if (newTags == null || newTags.Count() == 0)
             {
                 throw new Exception("Response of tags request is empty");

@@ -43,7 +43,7 @@ namespace StackOverflowTags.Services.StackOverflowService
                 throw new Exception("Unable to receive data due to url string is empty");
             }
 
-            var newTags = _tagUtils.DoTagRequestAsync(url, _tagsJsonField);
+            var newTags = _tagUtils.DoTagRequest(url, _tagsJsonField);
             if (newTags == null || newTags.Count() == 0)
             {
                 return false;
