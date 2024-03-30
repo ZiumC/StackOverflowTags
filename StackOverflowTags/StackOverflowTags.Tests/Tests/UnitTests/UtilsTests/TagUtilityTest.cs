@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using StackOverflowTags.Mappers;
 using StackOverflowTags.Models.JsonModels;
+using StackOverflowTags.Services.HttpService;
 using StackOverflowTags.Tests.DbContexts;
 using System;
 using System.Collections.Generic;
@@ -27,10 +28,10 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
         }
 
         [Fact]
-        public void TagUtils_MapResponse_ReturnsTags()
+        public void TagUtils_DeserializeResponse_DeserializedTags()
         {
             //Arrange
-            var tagUtils = new TagUtils();
+            var tagUtils = new TagUtils(new HttpService());
             var hardcodedTagsStrings = new HardcodedStringContext().GetHardcoded_6_Tags();
             var tagsJsonField = _config["Application:TagsJsonField"];
 
@@ -39,6 +40,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
 
             //Assert
             desarielizedObjects.Should().NotBeNullOrEmpty();
+            desarielizedObjects?.Should().BeOfType<List<JsonTagModel>>();
             desarielizedObjects?.Count().Should().Be(6);
             desarielizedObjects?.Select(x => x.Count).Sum().Should().Be(11135478);
             desarielizedObjects?
