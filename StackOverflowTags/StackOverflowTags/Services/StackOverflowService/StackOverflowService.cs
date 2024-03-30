@@ -27,7 +27,7 @@ namespace StackOverflowTags.Services.StackOverflowService
             _httpService = httpService;
 
             _url = _config["EndpointHosts:StackOverflow:Tags"];
-            _keyNameTagsJson = _config["Application:TagsKeyJsonName"];
+            _keyNameTagsJson = _config["Application:TagsJsonField"];
 
 
             if (string.IsNullOrEmpty(_url))

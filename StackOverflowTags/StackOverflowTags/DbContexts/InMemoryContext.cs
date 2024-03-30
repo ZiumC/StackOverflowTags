@@ -21,21 +21,21 @@ namespace StackOverflowTags.DbContexts
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
         private readonly string? _url;
-        private readonly string? _keyNameTagsJson;
+        private readonly string? _tagsJsonField;
 
         public InMemoryContext(DbContextOptions<InMemoryContext> options, IConfiguration config, IHttpService httpService) : base(options)
         {
             _config = config;
             _httpService = httpService;
             _url = _config["EndpointHosts:StackOverflow:Tags"];
-            _keyNameTagsJson = _config["Application:TagsKeyJsonName"];
+            _tagsJsonField = _config["Application:TagsJsonField"];
 
             if (string.IsNullOrEmpty(_url))
             {
                 throw new Exception("Unable to create in memory data due to url string is empty");
             }
 
-            if (string.IsNullOrEmpty(_keyNameTagsJson))
+            if (string.IsNullOrEmpty(_tagsJsonField))
             {
                 throw new Exception("Unable to create in memory data due to url string is empty");
             }
@@ -56,8 +56,7 @@ namespace StackOverflowTags.DbContexts
             {
                 string url = string.Format(_url, i, _size);
                 string stackOverflowTagsString = _httpService.DoGetAsync(url).Result;
-                //string stackOverflowTagsString = "{\"items\":[{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":2528949,\"name\":\"javascript\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":2192345,\"name\":\"python\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1917388,\"name\":\"java\"},{\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1615031,\"name\":\"c#\"},{\"collectives\":[{\"tags\":[\"php\"],\"external_links\":[{\"type\":\"support\",\"link\":\"https://stackoverflow.com/contact?topic=15\"}],\"description\":\"A collective where developers working with PHP can learn and connect about the open source scripting language.\",\"link\":\"/collectives/php\",\"name\":\"PHP\",\"slug\":\"php\"}],\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1464485,\"name\":\"php\"},{\"collectives\":[{\"tags\":[\"android\",\"ios\"],\"external_links\":[{\"type\":\"support\",\"link\":\"https://stackoverflow.com/contact?topic=15\"}],\"description\":\"A collective for developers who want to share their knowledge and learn more about mobile development practices and platforms\",\"link\":\"/collectives/mobile-dev\",\"name\":\"Mobile Development\",\"slug\":\"mobile-dev\"}],\"has_synonyms\":true,\"is_moderator_only\":false,\"is_required\":false,\"count\":1417280,\"name\":\"android\"}],\"has_more\":true,\"quota_max\":10000,\"quota_remaining\":9692}";
-                var tagData = new TagUtils().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _keyNameTagsJson);
+                var tagData = new TagUtils().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _tagsJsonField);
                 if (tagData == null)
                 {
                     throw new Exception("Unavle to receive C# objest from string");
