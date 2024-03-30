@@ -16,11 +16,13 @@ namespace StackOverflowTags.Controllers
     {
         private readonly IStackOverflowService _stackOverflowService;
         private readonly IHttpService _httpService;
+        private readonly IConfiguration _config;
 
-        public StackOverflowController(IStackOverflowService stackOverflowService, IHttpService httpService)
+        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService)
         {
             _stackOverflowService = stackOverflowService;
             _httpService = httpService;
+            _config = config;
         }
 
         /// <summary>
@@ -88,7 +90,7 @@ namespace StackOverflowTags.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> RefillDatabaseAsync()
         {
-            bool hasDbRefilled = await _stackOverflowService.RefillDatabase();
+            bool hasDbRefilled = await _stackOverflowService.RefillDatabase(_config["EndpointHosts:StackOverflow:Tags"]);
             return Ok(new { HasDbRefilled = hasDbRefilled });
         }
     }

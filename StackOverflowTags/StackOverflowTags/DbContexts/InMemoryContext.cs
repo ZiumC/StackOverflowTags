@@ -56,7 +56,7 @@ namespace StackOverflowTags.DbContexts
             {
                 string url = string.Format(_url, i, _size);
                 string stackOverflowTagsString = _httpService.DoGetAsync(url).Result;
-                var tagData = new TagUtils().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _tagsJsonField);
+                var tagData = new TagUtils(_httpService).DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _tagsJsonField);
                 if (tagData == null)
                 {
                     throw new Exception("Unavle to receive C# objest from string");
