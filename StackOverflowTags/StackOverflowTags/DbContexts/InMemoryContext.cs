@@ -16,10 +16,9 @@ namespace StackOverflowTags.DbContexts
     public class InMemoryContext : DbContext
     {
 
-        private readonly int _times = 11;
-        private readonly int _size = 100;
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
+        private readonly TagUtils _tagUtils;
         private readonly string? _url;
         private readonly string? _tagsJsonField;
 
@@ -27,18 +26,10 @@ namespace StackOverflowTags.DbContexts
         {
             _config = config;
             _httpService = httpService;
+            _tagUtils = new TagUtils(_httpService);
+
             _url = _config["EndpointHosts:StackOverflow:Tags"];
             _tagsJsonField = _config["Application:TagsJsonField"];
-
-            if (string.IsNullOrEmpty(_url))
-            {
-                throw new Exception("Unable to create in memory data due to url string is empty");
-            }
-
-            if (string.IsNullOrEmpty(_tagsJsonField))
-            {
-                throw new Exception("Unable to create in memory data due to url string is empty");
-            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,36 +42,34 @@ namespace StackOverflowTags.DbContexts
                 tm.Property(tm => tm.Id).ValueGeneratedOnAdd();
             });
 
-            int id = 1;
-            for (int i = 1; i <= _times; i++)
+            if (string.IsNullOrEmpty(_url))
             {
-                string url = string.Format(_url, i, _size);
-                string stackOverflowTagsString = _httpService.DoGetAsync(url).Result;
-                var tagData = new TagUtils(_httpService).DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _tagsJsonField);
-                if (tagData == null)
-                {
-                    throw new Exception("Unavle to receive C# objest from string");
-                }
+                throw new Exception("Unable to create in memory data due to url string is empty");
+            }
 
-                var totalShare = tagData.Select(td => td.Count).Sum();
+            var newTags = _tagUtils.DoTagRequestAsync(_url, _tagsJsonField);
+            if (newTags == null || newTags.Count() == 0)
+            {
+                throw new Exception("Response of tags request is empty");
+            }
 
-                foreach (var tag in tagData)
+            var totalShare = newTags.Select(td => td.Count).Sum();
+            for (int id = 1; id <= newTags.Count(); id++)
+            {
+                var tag = newTags[id];
+                modelBuilder.Entity<TagModel>(tm =>
                 {
-                    modelBuilder.Entity<TagModel>(tm =>
+                    tm.HasData(new TagModel
                     {
-                        tm.HasData(new TagModel
-                        {
-
-                            Id = id++,
-                            Name = tag.Name,
-                            Count = tag.Count,
-                            HasSynonyms = tag.Has_synonyms,
-                            IsModeratorOnly = tag.Is_moderator_only,
-                            IsRequired = tag.Is_required,
-                            Share = (double)tag.Count / (double)totalShare
-                        });
+                        Id = id,
+                        Name = tag.Name,
+                        Count = tag.Count,
+                        HasSynonyms = tag.Has_synonyms,
+                        IsModeratorOnly = tag.Is_moderator_only,
+                        IsRequired = tag.Is_required,
+                        Share = (double)tag.Count / (double)totalShare
                     });
-                }
+                });
             }
         }
         public DbSet<TagModel> Tags { get; set; }
