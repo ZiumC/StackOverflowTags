@@ -69,5 +69,22 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
                 .Where(x => string.IsNullOrEmpty(x.Name))
                 .Should().BeNullOrEmpty();
         }
+
+        [Fact]
+        public void TagUtils_DoTagRequestAsync_ReturnsEmptyTags()
+        {
+            //Arrange
+            var tagUtils = new TagUtils(new HttpService());
+            var tagsJsonField = _config["Application:TagsJsonField"];
+            var url = _config["EndpointHosts:StackOverflow:Tags"];
+
+            //Act
+            var desarielizedObjects = tagUtils
+                .DoTagRequest(url, tagsJsonField, 0, 0);
+
+            //Assert
+            desarielizedObjects.Should().BeNullOrEmpty();
+            desarielizedObjects.Should().BeOfType<List<JsonTagModel>>();
+        }
     }
 }
