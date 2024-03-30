@@ -84,5 +84,42 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
             tagsResult_3?.Last().Name.Should().Be("android");
 
         }
+
+        [Fact]
+        public async Task StackOverflowController_GetTagsAsync_ReturnsErrors()
+        {
+            //Arrange
+            var inMemContext = await new InMemContext()
+                .GetDatabaseContext();
+            var httpService = new HttpService();
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService);
+            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService);
+
+            //Act
+            var badRequest_1 = await stackOverflowController.GetTagsAsync(-1, 20, "asc");
+            var badRequestActionResult_1 = badRequest_1 as BadRequestObjectResult;
+            var badRequestResult_1 = badRequestActionResult_1?.Value as string;
+
+            var badRequest_2 = await stackOverflowController.GetTagsAsync(1, 0);
+            var badRequestActionResult_2 = badRequest_2 as BadRequestObjectResult;
+            var badRequestResult_2 = badRequestActionResult_2?.Value as string;
+
+            var badRequest_3 = await stackOverflowController.GetTagsAsync(1, 3, "aaa");
+            var badRequestActionResult_3 = badRequest_3 as BadRequestObjectResult;
+            var badRequestResult_3 = badRequestActionResult_3?.Value as string;
+
+            //Assert
+            badRequest_1.Should().BeOfType<BadRequestObjectResult>();
+            badRequestActionResult_1.Should().NotBeNull();
+            badRequestResult_1?.Should().Contain("is invalid");
+
+            badRequest_2.Should().BeOfType<BadRequestObjectResult>();
+            badRequestActionResult_2.Should().NotBeNull();
+            badRequestResult_2?.Should().NotBeNullOrEmpty("is invalid");
+
+            badRequest_3.Should().BeOfType<BadRequestObjectResult>();
+            badRequestActionResult_3.Should().NotBeNull();
+            badRequestResult_3?.Should().NotBeNullOrEmpty("is unknown");
+        }
     }
 }

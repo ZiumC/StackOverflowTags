@@ -58,9 +58,9 @@ namespace StackOverflowTags.DbContexts
             }
 
             var totalShare = newTags.Select(td => td.Count).Sum();
-            for (int id = 1; id <= newTags.Count(); id++)
+            int id = 1;
+            foreach (var tag in newTags) 
             {
-                var tag = newTags[id];
                 modelBuilder.Entity<TagModel>(tm =>
                 {
                     tm.HasData(new TagModel
@@ -74,6 +74,7 @@ namespace StackOverflowTags.DbContexts
                         Share = (double)tag.Count / (double)totalShare
                     });
                 });
+                id++;
             }
         }
 
