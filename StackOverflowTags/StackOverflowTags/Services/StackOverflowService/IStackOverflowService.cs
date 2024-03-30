@@ -5,6 +5,6 @@ namespace StackOverflowTags.Services.StackOverflowService
     public interface IStackOverflowService
     {
         public Task<IEnumerable<TagModel>> GetStackOverflowTagsAsync();
-        public Task<bool> RefillDatabase();
+        public Task<bool> RefillDatabase(string? url);
     }
 }

@@ -12,12 +12,10 @@ namespace StackOverflowTags.Services.StackOverflowService
     public class StackOverflowService : IStackOverflowService
     {
         private readonly InMemoryContext _inMemoryContext;
+        private readonly TagUtils _tagUtils;
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
-        private readonly int _times = 11;
-        private readonly int _size = 100;
-        private readonly string? _url;
-        private readonly string? _keyNameTagsJson;
+        private readonly string? _tagsJsonField;
 
         public StackOverflowService(InMemoryContext inMemoryContext, IConfiguration config, IHttpService httpService)
         {
@@ -25,20 +23,9 @@ namespace StackOverflowTags.Services.StackOverflowService
             _inMemoryContext.Database.EnsureCreated();
             _config = config;
             _httpService = httpService;
+            _tagUtils = new TagUtils(_httpService);
 
-            _url = _config["EndpointHosts:StackOverflow:Tags"];
-            _keyNameTagsJson = _config["Application:TagsKeyJsonName"];
-
-
-            if (string.IsNullOrEmpty(_url))
-            {
-                throw new Exception("Unable to create in memory data due to url string is empty");
-            }
-
-            if (string.IsNullOrEmpty(_keyNameTagsJson))
-            {
-                throw new Exception("Unable to create in memory data due to url string is empty");
-            }
+            _tagsJsonField = _config["Application:TagsJsonField"];
         }
 
         public async Task<IEnumerable<TagModel>> GetStackOverflowTagsAsync()
@@ -47,36 +34,31 @@ namespace StackOverflowTags.Services.StackOverflowService
                 .ToListAsync();
         }
 
-        public async Task<bool> RefillDatabase()
+        public async Task<bool> RefillDatabase(string? url)
         {
-            //this wokraround is needed due to transactions aren't supported using DatabaseInMemory
-            var dataCopy = _inMemoryContext.Tags.ToList();
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new Exception("Unable to receive data due to url string is empty");
+            }
 
+            var newTags = _tagUtils.DoTagRequest(url, _tagsJsonField);
+            if (newTags == null || newTags.Count() == 0)
+            {
+                return false;
+            }
+            long totalShare = newTags.Select(x => x.Count).Sum();
+
+            //this wokraround is needed due to transactions aren't supported using DatabaseInMemory
+            var tagsCopy = _inMemoryContext.Tags.ToList();
             foreach (var tag in _inMemoryContext.Tags)
             {
                 _inMemoryContext.Tags.Remove(tag);
             }
             await _inMemoryContext.SaveChangesAsync();
 
-            for (int i = 1; i <= _times; i++)
+            try
             {
-                string url = string.Format(_url, i, _size);
-                string stackOverflowTagsString = await _httpService.DoGetAsync(url);
-                var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _keyNameTagsJson);
-                if (tagData == null)
-                {
-                    await _inMemoryContext.Database.EnsureDeletedAsync();
-                    foreach (var tag in dataCopy)
-                    {
-                        _inMemoryContext.Tags.Add(tag);
-                    }
-                    await _inMemoryContext.SaveChangesAsync();
-                    return false;
-                }
-
-                var totalShare = tagData.Select(td => td.Count).Sum();
-
-                foreach (var tag in tagData)
+                foreach (var tag in newTags)
                 {
                     _inMemoryContext.Tags.Add(new TagModel
                     {
@@ -88,10 +70,21 @@ namespace StackOverflowTags.Services.StackOverflowService
                         Share = (double)tag.Count / (double)totalShare
                     });
                 }
-
                 await _inMemoryContext.SaveChangesAsync();
+
+                return true;
             }
-            return true;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                await _inMemoryContext.Database.EnsureDeletedAsync();
+                foreach (var tag in tagsCopy)
+                {
+                    _inMemoryContext.Tags.Add(tag);
+                }
+                await _inMemoryContext.SaveChangesAsync();
+                return false;
+            }
         }
     }
 }
