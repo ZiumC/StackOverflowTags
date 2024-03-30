@@ -62,7 +62,7 @@ namespace StackOverflowTags.Services.StackOverflowService
             {
                 string url = string.Format(_url, i, _size);
                 string stackOverflowTagsString = await _httpService.DoGetAsync(url);
-                var tagData = new TagMapper().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _keyNameTagsJson);
+                var tagData = new TagUtils().DeserializeResponse<IEnumerable<JsonTagModel>>(stackOverflowTagsString, _keyNameTagsJson);
                 if (tagData == null)
                 {
                     await _inMemoryContext.Database.EnsureDeletedAsync();

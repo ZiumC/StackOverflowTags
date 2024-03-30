@@ -4,7 +4,7 @@ using StackOverflowTags.Models.DatabaseModels;
 
 namespace StackOverflowTags.Mappers
 {
-    public class TagMapper
+    public class TagUtils
     {
         public T? DeserializeResponse<T>(string httpMessage, string? key)
         {
