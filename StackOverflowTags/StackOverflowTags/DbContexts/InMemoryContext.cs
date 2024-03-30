@@ -32,6 +32,10 @@ namespace StackOverflowTags.DbContexts
             _tagsJsonField = _config["Application:TagsJsonField"];
         }
 
+        public InMemoryContext(DbContextOptions<InMemoryContext> options) : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -44,7 +48,7 @@ namespace StackOverflowTags.DbContexts
 
             if (string.IsNullOrEmpty(_url))
             {
-                throw new Exception("Unable to create in memory data due to url string is empty");
+                return;
             }
 
             var newTags = _tagUtils.DoTagRequest(_url, _tagsJsonField);
@@ -72,6 +76,7 @@ namespace StackOverflowTags.DbContexts
                 });
             }
         }
+
         public DbSet<TagModel> Tags { get; set; }
 
     }

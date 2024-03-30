@@ -26,8 +26,6 @@ namespace StackOverflowTags.Services.StackOverflowService
             _tagUtils = new TagUtils(_httpService);
 
             _tagsJsonField = _config["Application:TagsJsonField"];
-
-
         }
 
         public async Task<IEnumerable<TagModel>> GetStackOverflowTagsAsync()

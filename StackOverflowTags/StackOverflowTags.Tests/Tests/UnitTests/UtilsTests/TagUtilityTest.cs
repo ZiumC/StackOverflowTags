@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StackOverflowTags.Tests.Tests.UnitTests.MappersTest
+namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
 {
     public class TagUtilityTest
     {
