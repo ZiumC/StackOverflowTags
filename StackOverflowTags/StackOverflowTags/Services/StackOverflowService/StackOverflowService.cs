@@ -18,7 +18,7 @@ namespace StackOverflowTags.Services.StackOverflowService
         private readonly ILogger _logger;
         private readonly string? _tagsJsonField;
 
-        public StackOverflowService(InMemoryContext inMemoryContext, IConfiguration config, IHttpService httpService, ILogger logger)
+        public StackOverflowService(InMemoryContext inMemoryContext, IConfiguration config, IHttpService httpService, ILogger<StackOverflowService> logger)
         {
             _inMemoryContext = inMemoryContext;
             _inMemoryContext.Database.EnsureCreated();

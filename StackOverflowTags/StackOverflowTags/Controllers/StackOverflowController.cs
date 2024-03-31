@@ -19,7 +19,7 @@ namespace StackOverflowTags.Controllers
         private readonly IConfiguration _config;
         private readonly ILogger _logger;
 
-        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService, ILogger logger)
+        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService, ILogger<StackOverflowController> logger)
         {
             _stackOverflowService = stackOverflowService;
             _httpService = httpService;
@@ -40,12 +40,14 @@ namespace StackOverflowTags.Controllers
         {
             if (page <= 0)
             {
+                _logger.LogError($"Invalid page number: {page}");
                 ModelState.AddModelError("error", "Page number is invalid");
                 return BadRequest(ModelState);
             }
 
             if (pageSize <= 0)
             {
+                _logger.LogError($"Invalid page size: {pageSize}");
                 ModelState.AddModelError("error", "Page size is invalid");
                 return BadRequest(ModelState);
             }
@@ -54,6 +56,7 @@ namespace StackOverflowTags.Controllers
             var tags = await _stackOverflowService.GetStackOverflowTagsAsync();
             if (tags == null || tags.Count() == 0)
             {
+                _logger.LogInformation("Tags not found");
                 return NotFound();
             }
 
@@ -77,6 +80,7 @@ namespace StackOverflowTags.Controllers
                         .ToList();
                     break;
                 default:
+                    _logger.LogError($"Order type is invalid: {order}");
                     ModelState.AddModelError("error", "Order type is unknown");
                     return BadRequest(ModelState);
             }

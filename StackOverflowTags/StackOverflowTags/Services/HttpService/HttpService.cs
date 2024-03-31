@@ -17,7 +17,7 @@ namespace StackOverflowTags.Services.HttpService
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
-        public HttpService(ILogger logger)
+        public HttpService(ILogger<HttpService> logger)
         {
             var httpClientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
             _httpClient = new HttpClient(httpClientHandler);
