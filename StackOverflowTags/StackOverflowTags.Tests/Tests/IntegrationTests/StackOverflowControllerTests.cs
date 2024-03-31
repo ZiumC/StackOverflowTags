@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
 using StackOverflowTags.Controllers;
 using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Services.HttpService;
@@ -11,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace StackOverflowTags.Tests.Tests.IntegrationTests
 {
@@ -18,7 +21,7 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
     {
         private readonly IConfiguration _config;
 
-        public StackOverflowControllerTests()
+        public StackOverflowControllerTests(ITestOutputHelper helper)
         {
             _config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -27,17 +30,21 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
                      optional: false,
                      reloadOnChange: true)
                .Build();
+
         }
 
         [Fact]
-        public async Task StackOverflowController_GetTagsAsync_ReturnsTags() 
+        public async Task StackOverflowController_GetTagsAsync_ReturnsTags()
         {
             //Arrange
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var stackOverflowServiceLogger = Mock.Of<ILogger<StackOverflowService>>();
+            var stackOverflowControllerLogger = Mock.Of<ILogger<StackOverflowController>>();
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var httpService = new HttpService(null);
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, null);
-            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, null);
+            var httpService = new HttpService(httpServiceLogger);
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, stackOverflowServiceLogger);
+            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, stackOverflowControllerLogger);
 
             //Act
             var okRequest_1 = await stackOverflowController.GetTagsAsync(); //with default request vals
@@ -89,11 +96,14 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
         public async Task StackOverflowController_GetTagsAsync_ReturnsErrors()
         {
             //Arrange
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var stackOverflowServiceLogger = Mock.Of<ILogger<StackOverflowService>>();
+            var stackOverflowControllerLogger = Mock.Of<ILogger<StackOverflowController>>();
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var httpService = new HttpService(null);
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, null);
-            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, null);
+            var httpService = new HttpService(httpServiceLogger);
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, stackOverflowServiceLogger);
+            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, stackOverflowControllerLogger);
 
             //Act
             var badRequest_1 = await stackOverflowController.GetTagsAsync(-1, 20, "asc");

@@ -1,8 +1,12 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using StackOverflowTags.Controllers;
 using StackOverflowTags.Mappers;
 using StackOverflowTags.Models.JsonModels;
 using StackOverflowTags.Services.HttpService;
+using StackOverflowTags.Services.StackOverflowService;
 using StackOverflowTags.Tests.DbContexts;
 using System;
 using System.Collections.Generic;
@@ -33,7 +37,8 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DeserializeResponse_ReturnsDeserializedTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService(null));
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var tagUtils = new TagUtils(new HttpService(httpServiceLogger));
             var hardcodedTagsStrings = new HardcodedStringContext().GetHardcoded_6_Tags();
             var tagsJsonField = _config["Application:TagsJsonField"];
 
@@ -55,7 +60,8 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DoTagRequestAsync_ReturnsDeserializedTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService(null));
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var tagUtils = new TagUtils(new HttpService(httpServiceLogger));
             var tagsJsonField = _config["Application:TagsJsonField"];
             var url = _config["EndpointHosts:StackOverflow:Tags"];
 
@@ -76,7 +82,8 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DoTagRequestAsync_ReturnsEmptyTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService(null));
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var tagUtils = new TagUtils(new HttpService(httpServiceLogger));
             var tagsJsonField = _config["Application:TagsJsonField"];
             var url = _config["EndpointHosts:StackOverflow:Tags"];
 

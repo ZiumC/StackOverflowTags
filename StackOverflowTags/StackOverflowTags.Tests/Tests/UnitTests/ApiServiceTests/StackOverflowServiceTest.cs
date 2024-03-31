@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using StackOverflowTags.Controllers;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Models.DatabaseModels;
 using StackOverflowTags.Services.HttpService;
@@ -33,9 +36,12 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.ApiServiceTests
         public async void StackOverflowService_GetStackOverflowTagsAsync_ReturnsTags()
         {
             //Arrange
+            var httpServiceLogger = Mock.Of<ILogger<HttpService>>();
+            var stackOverflowServiceLogger = Mock.Of<ILogger<StackOverflowService>>();
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, new HttpService(null), null);
+            var stackOverflowService = 
+                new StackOverflowService(inMemContext, _config, new HttpService(httpServiceLogger), stackOverflowServiceLogger);
 
             //Act
             var tags = await stackOverflowService.GetStackOverflowTagsAsync();
