@@ -5,7 +5,9 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StackOverflowTags", "StackOverflowTags\StackOverflowTags.csproj", "{2C4451F1-4371-40FA-8325-BA502707D390}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackOverflowTags.Tests", "StackOverflowTags.Tests\StackOverflowTags.Tests.csproj", "{43C56D29-2A4F-42C5-AF51-01B35A533B4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StackOverflowTags.Tests", "StackOverflowTags.Tests\StackOverflowTags.Tests.csproj", "{43C56D29-2A4F-42C5-AF51-01B35A533B4B}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2852CB9B-58B7-45E7-AA46-276D1A8F8488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{43C56D29-2A4F-42C5-AF51-01B35A533B4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43C56D29-2A4F-42C5-AF51-01B35A533B4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43C56D29-2A4F-42C5-AF51-01B35A533B4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2852CB9B-58B7-45E7-AA46-276D1A8F8488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2852CB9B-58B7-45E7-AA46-276D1A8F8488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2852CB9B-58B7-45E7-AA46-276D1A8F8488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2852CB9B-58B7-45E7-AA46-276D1A8F8488}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
