@@ -15,15 +15,17 @@ namespace StackOverflowTags.Services.StackOverflowService
         private readonly TagUtils _tagUtils;
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
+        private readonly ILogger _logger;
         private readonly string? _tagsJsonField;
 
-        public StackOverflowService(InMemoryContext inMemoryContext, IConfiguration config, IHttpService httpService)
+        public StackOverflowService(InMemoryContext inMemoryContext, IConfiguration config, IHttpService httpService, ILogger logger)
         {
             _inMemoryContext = inMemoryContext;
             _inMemoryContext.Database.EnsureCreated();
             _config = config;
             _httpService = httpService;
             _tagUtils = new TagUtils(_httpService);
+            _logger = logger;
 
             _tagsJsonField = _config["Application:TagsJsonField"];
         }
@@ -44,6 +46,7 @@ namespace StackOverflowTags.Services.StackOverflowService
             var newTags = _tagUtils.DoTagRequest(url, _tagsJsonField);
             if (newTags == null || newTags.Count() == 0)
             {
+                _logger.LogInformation("List of new tags are empty");
                 return false;
             }
             long totalShare = newTags.Select(x => x.Count).Sum();
@@ -55,6 +58,7 @@ namespace StackOverflowTags.Services.StackOverflowService
                 _inMemoryContext.Tags.Remove(tag);
             }
             await _inMemoryContext.SaveChangesAsync();
+            _logger.LogInformation("Old tags has been removed");
 
             try
             {
@@ -71,18 +75,20 @@ namespace StackOverflowTags.Services.StackOverflowService
                     });
                 }
                 await _inMemoryContext.SaveChangesAsync();
+                _logger.LogInformation("New tags has been added");
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                _logger.LogError($"Error causer by: {ex.Message}");
                 await _inMemoryContext.Database.EnsureDeletedAsync();
                 foreach (var tag in tagsCopy)
                 {
                     _inMemoryContext.Tags.Add(tag);
                 }
                 await _inMemoryContext.SaveChangesAsync();
+                _logger.LogInformation("Changes has been rollbacked");
                 return false;
             }
         }

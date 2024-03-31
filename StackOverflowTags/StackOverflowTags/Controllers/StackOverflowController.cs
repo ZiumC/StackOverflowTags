@@ -17,12 +17,14 @@ namespace StackOverflowTags.Controllers
         private readonly IStackOverflowService _stackOverflowService;
         private readonly IHttpService _httpService;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
-        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService)
+        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService, ILogger logger)
         {
             _stackOverflowService = stackOverflowService;
             _httpService = httpService;
             _config = config;
+            _logger = logger;
         }
 
         /// <summary>
@@ -90,7 +92,15 @@ namespace StackOverflowTags.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> RefillDatabaseAsync()
         {
-            bool hasDbRefilled = await _stackOverflowService.RefillDatabase(_config["EndpointHosts:StackOverflow:Tags"]);
+            bool hasDbRefilled = false;
+            try
+            {
+                hasDbRefilled = await _stackOverflowService.RefillDatabase(_config["EndpointHosts:StackOverflow:Tags"]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error causer by: {ex.Message}");
+            }
             return Ok(new { HasDbRefilled = hasDbRefilled });
         }
     }

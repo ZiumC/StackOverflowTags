@@ -35,9 +35,9 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
             //Arrange
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var httpService = new HttpService();
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService);
-            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService);
+            var httpService = new HttpService(null);
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, null);
+            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, null);
 
             //Act
             var okRequest_1 = await stackOverflowController.GetTagsAsync(); //with default request vals
@@ -91,9 +91,9 @@ namespace StackOverflowTags.Tests.Tests.IntegrationTests
             //Arrange
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var httpService = new HttpService();
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService);
-            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService);
+            var httpService = new HttpService(null);
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, httpService, null);
+            var stackOverflowController = new StackOverflowController(stackOverflowService, _config, httpService, null);
 
             //Act
             var badRequest_1 = await stackOverflowController.GetTagsAsync(-1, 20, "asc");
