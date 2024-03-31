@@ -18,15 +18,17 @@ namespace StackOverflowTags.DbContexts
 
         private readonly IConfiguration _config;
         private readonly IHttpService _httpService;
+        private readonly ILogger<InMemoryContext> _logger;
         private readonly TagUtils _tagUtils;
         private readonly string? _url;
         private readonly string? _tagsJsonField;
 
-        public InMemoryContext(DbContextOptions<InMemoryContext> options, IConfiguration config, IHttpService httpService) : base(options)
+        public InMemoryContext(DbContextOptions<InMemoryContext> options, IConfiguration config, IHttpService httpService, ILogger<InMemoryContext> logger) : base(options)
         {
             _config = config;
             _httpService = httpService;
             _tagUtils = new TagUtils(_httpService);
+            _logger = logger;
 
             _url = _config["EndpointHosts:StackOverflow:Tags"];
             _tagsJsonField = _config["Application:TagsJsonField"];
@@ -40,41 +42,50 @@ namespace StackOverflowTags.DbContexts
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<TagModel>(tm =>
+            try
             {
-                tm.HasKey(tm => tm.Id);
-                tm.Property(tm => tm.Id).ValueGeneratedOnAdd();
-            });
 
-            if (string.IsNullOrEmpty(_url))
-            {
-                return;
-            }
 
-            var newTags = _tagUtils.DoTagRequest(_url, _tagsJsonField);
-            if (newTags == null || newTags.Count() == 0)
-            {
-                throw new Exception("Response of tags request is empty");
-            }
-
-            var totalShare = newTags.Select(td => td.Count).Sum();
-            int id = 1;
-            foreach (var tag in newTags) 
-            {
                 modelBuilder.Entity<TagModel>(tm =>
                 {
-                    tm.HasData(new TagModel
-                    {
-                        Id = id,
-                        Name = tag.Name,
-                        Count = tag.Count,
-                        HasSynonyms = tag.Has_synonyms,
-                        IsModeratorOnly = tag.Is_moderator_only,
-                        IsRequired = tag.Is_required,
-                        Share = (double)tag.Count / (double)totalShare
-                    });
+                    tm.HasKey(tm => tm.Id);
+                    tm.Property(tm => tm.Id).ValueGeneratedOnAdd();
                 });
-                id++;
+
+                if (string.IsNullOrEmpty(_url))
+                {
+                    return;
+                }
+
+                var newTags = _tagUtils.DoTagRequest(_url, _tagsJsonField);
+                if (newTags == null || newTags.Count() == 0)
+                {
+                    throw new Exception("Response of tags request is empty");
+                }
+
+                var totalShare = newTags.Select(td => td.Count).Sum();
+                int id = 1;
+                foreach (var tag in newTags)
+                {
+                    modelBuilder.Entity<TagModel>(tm =>
+                    {
+                        tm.HasData(new TagModel
+                        {
+                            Id = id,
+                            Name = tag.Name,
+                            Count = tag.Count,
+                            HasSynonyms = tag.Has_synonyms,
+                            IsModeratorOnly = tag.Is_moderator_only,
+                            IsRequired = tag.Is_required,
+                            Share = (double)tag.Count / (double)totalShare
+                        });
+                    });
+                    id++;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error causer by: {ex.Message}");
             }
         }
 

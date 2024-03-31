@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NReco.Logging.File;
 using Microsoft.OpenApi.Models;
 using StackOverflowTags.DbContexts;
 using StackOverflowTags.Services.HttpService;
@@ -32,6 +33,12 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
+});
+
+
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.AddFile("app.log", append: true);
 });
 
 var app = builder.Build();

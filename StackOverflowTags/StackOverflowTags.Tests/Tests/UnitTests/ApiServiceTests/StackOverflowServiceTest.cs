@@ -35,7 +35,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.ApiServiceTests
             //Arrange
             var inMemContext = await new InMemContext()
                 .GetDatabaseContext();
-            var stackOverflowService = new StackOverflowService(inMemContext, _config, new HttpService());
+            var stackOverflowService = new StackOverflowService(inMemContext, _config, new HttpService(null), null);
 
             //Act
             var tags = await stackOverflowService.GetStackOverflowTagsAsync();

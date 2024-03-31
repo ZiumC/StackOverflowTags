@@ -16,6 +16,8 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
     {
 
         public readonly IConfiguration _config;
+
+
         public TagUtilityTest()
         {
             _config = new ConfigurationBuilder()
@@ -31,7 +33,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DeserializeResponse_ReturnsDeserializedTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService());
+            var tagUtils = new TagUtils(new HttpService(null));
             var hardcodedTagsStrings = new HardcodedStringContext().GetHardcoded_6_Tags();
             var tagsJsonField = _config["Application:TagsJsonField"];
 
@@ -53,7 +55,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DoTagRequestAsync_ReturnsDeserializedTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService());
+            var tagUtils = new TagUtils(new HttpService(null));
             var tagsJsonField = _config["Application:TagsJsonField"];
             var url = _config["EndpointHosts:StackOverflow:Tags"];
 
@@ -74,7 +76,7 @@ namespace StackOverflowTags.Tests.Tests.UnitTests.UtilsTests
         public void TagUtils_DoTagRequestAsync_ReturnsEmptyTags()
         {
             //Arrange
-            var tagUtils = new TagUtils(new HttpService());
+            var tagUtils = new TagUtils(new HttpService(null));
             var tagsJsonField = _config["Application:TagsJsonField"];
             var url = _config["EndpointHosts:StackOverflow:Tags"];
 

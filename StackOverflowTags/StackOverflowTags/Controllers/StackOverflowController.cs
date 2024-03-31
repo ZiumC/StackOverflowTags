@@ -17,12 +17,14 @@ namespace StackOverflowTags.Controllers
         private readonly IStackOverflowService _stackOverflowService;
         private readonly IHttpService _httpService;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
-        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService)
+        public StackOverflowController(IStackOverflowService stackOverflowService, IConfiguration config, IHttpService httpService, ILogger<StackOverflowController> logger)
         {
             _stackOverflowService = stackOverflowService;
             _httpService = httpService;
             _config = config;
+            _logger = logger;
         }
 
         /// <summary>
@@ -38,12 +40,14 @@ namespace StackOverflowTags.Controllers
         {
             if (page <= 0)
             {
+                _logger.LogError($"Invalid page number: {page}");
                 ModelState.AddModelError("error", "Page number is invalid");
                 return BadRequest(ModelState);
             }
 
             if (pageSize <= 0)
             {
+                _logger.LogError($"Invalid page size: {pageSize}");
                 ModelState.AddModelError("error", "Page size is invalid");
                 return BadRequest(ModelState);
             }
@@ -52,6 +56,7 @@ namespace StackOverflowTags.Controllers
             var tags = await _stackOverflowService.GetStackOverflowTagsAsync();
             if (tags == null || tags.Count() == 0)
             {
+                _logger.LogInformation("Tags not found");
                 return NotFound();
             }
 
@@ -75,6 +80,7 @@ namespace StackOverflowTags.Controllers
                         .ToList();
                     break;
                 default:
+                    _logger.LogError($"Order type is invalid: {order}");
                     ModelState.AddModelError("error", "Order type is unknown");
                     return BadRequest(ModelState);
             }
@@ -90,7 +96,15 @@ namespace StackOverflowTags.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> RefillDatabaseAsync()
         {
-            bool hasDbRefilled = await _stackOverflowService.RefillDatabase(_config["EndpointHosts:StackOverflow:Tags"]);
+            bool hasDbRefilled = false;
+            try
+            {
+                hasDbRefilled = await _stackOverflowService.RefillDatabase(_config["EndpointHosts:StackOverflow:Tags"]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error causer by: {ex.Message}");
+            }
             return Ok(new { HasDbRefilled = hasDbRefilled });
         }
     }

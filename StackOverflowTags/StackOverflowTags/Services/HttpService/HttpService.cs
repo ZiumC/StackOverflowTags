@@ -16,11 +16,12 @@ namespace StackOverflowTags.Services.HttpService
     public class HttpService : IHttpService
     {
         private readonly HttpClient _httpClient;
-        public HttpService()
+        private readonly ILogger _logger;
+        public HttpService(ILogger<HttpService> logger)
         {
             var httpClientHandler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
             _httpClient = new HttpClient(httpClientHandler);
-
+            _logger = logger;
         }
 
         public async Task<string> DoGetAsync(string url)
@@ -34,8 +35,8 @@ namespace StackOverflowTags.Services.HttpService
             }
             else
             {
-                //NEED TO ADD LOGGING LATER!
-                throw new Exception("Response message is wrong");
+                _logger.LogError($"Request status code: {response.StatusCode}, message: {await response.Content.ReadAsStringAsync()}", url);
+                throw new Exception("Response status code is wrong");
             }
 
             return message;
